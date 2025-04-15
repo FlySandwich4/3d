@@ -11,6 +11,8 @@ import {
 	useTexture,
 	OrbitControls,
 	Scroll,
+	ImageProps,
+	Html,
 } from "@react-three/drei";
 import { easing } from "maath";
 // import "/images/thinkingCat.jpg"
@@ -25,11 +27,10 @@ export default function Page() {
 				<Rig rotation={[0, 0, 0.15]}>
 					<Carousel />
 				</Rig>
-				<ScrollControls pages={4}>
-					<Rig rotation={[0, 0, 0.15]}>
-						<Carousel />
-					</Rig>
-				</ScrollControls>
+				{/* This Scroll html section is for extra content */}
+				<Scroll html>
+					<h1>ewewewqrr</h1>
+				</Scroll>
 			</ScrollControls>
 			<fog attach="fog" args={["#a79", 8.5, 12]} />
 
@@ -91,14 +92,7 @@ type CardProps = JSX.IntrinsicElements["group"] & {
 };
 
 function Card({ url, ...props }: CardProps) {
-	const ref =
-		useRef<
-			THREE.Mesh<
-				THREE.BufferGeometry<THREE.NormalBufferAttributes>,
-				THREE.Material,
-				THREE.Object3DEventMap
-			>
-		>(null); // Explicitly typing the ref to match the expected type
+	const ref = useRef<THREE.Mesh>(null); // Adjusted to use a single type argument
 	const [hovered, setHovered] = useState(false);
 
 	const pointerOver = (e: Event) => {
@@ -123,6 +117,7 @@ function Card({ url, ...props }: CardProps) {
 
 	return (
 		<Image
+			// @ts-ignore
 			ref={ref}
 			url={url}
 			transparent
