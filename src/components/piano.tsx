@@ -18,7 +18,7 @@ type GLTFResult = GLTF & {
 
 export function PianoModel(props: JSX.IntrinsicElements["group"]) {
 	const groupRef = useRef<THREE.Group>(null);
-	const { nodes, _materials } = useGLTF("/piano.glb") as unknown as GLTFResult;
+	const { nodes } = useGLTF("/piano.glb") as unknown as GLTFResult;
 
 	useFrame((state, delta) => {
 		if (groupRef.current) {

@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { useRef, useState, ComponentProps, JSX } from "react";
+import { useRef, useState, ComponentProps, JSX, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
 	Image,
@@ -18,18 +18,45 @@ import { easing } from "maath";
 // import "/images/thinkingCat.jpg"
 import "@/util";
 import { PianoModel } from "@/components/piano";
+import { motion } from "framer-motion";
 
 export default function Page() {
 	return (
 		<Canvas camera={{ position: [0, 0, 100], fov: 15 }}>
 			<fog attach="fog" args={["#a79", 8.5, 12]} />
-			<ScrollControls pages={4}>
+			<ScrollControls pages={5}>
 				<Rig rotation={[0, 0, 0.15]}>
 					<Carousel />
 				</Rig>
-				{/* This Scroll html section is for extra content */}
+				<PianoSection />
 				<Scroll html>
-					<h1>ewewewqrr</h1>
+					<div className="flex flex-col items-center w-screen absolute">
+						<Section>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
+								1 Page Content 🎉
+							</h1>
+						</Section>
+						<Section>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
+								2 Page Content 🎉
+							</h1>
+						</Section>
+						<Section>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
+								3 Page Content 🎉
+							</h1>
+						</Section>
+						<Section>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
+								4 Page Content 🎉
+							</h1>
+						</Section>
+						<Section>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
+								Contact us 🎉
+							</h1>
+						</Section>
+					</div>
 				</Scroll>
 			</ScrollControls>
 			<fog attach="fog" args={["#a79", 8.5, 12]} />
@@ -45,7 +72,16 @@ function Rig(props: RigProps) {
 	const ref = useRef<THREE.Group>(null);
 	const scroll = useScroll();
 
+	useEffect(() => {
+		console.log(scroll); // Log the scroll offset
+	}, [scroll]); // Add scroll.offset as a dependency
+
 	useFrame((state, delta) => {
+		const fadeOut = scroll.range(0.5, 0.25);
+		const fade = 1 - fadeOut; // Inverts so 1 -> 0
+
+		// console.log(scroll.offset); // Log the scroll offset
+
 		if (!ref.current) return;
 		ref.current.rotation.y = -scroll.offset * (Math.PI * 2);
 		if (state.events?.update) {
@@ -58,6 +94,9 @@ function Rig(props: RigProps) {
 			delta
 		);
 		state.camera.lookAt(0, 0, 0);
+
+		const position: THREE.Vector3 = ref.current.position;
+		easing.damp3(ref.current.position, [0, 3 * fadeOut, 0], 0.1, delta);
 	});
 
 	return <group ref={ref} {...props} />;
@@ -94,6 +133,7 @@ type CardProps = JSX.IntrinsicElements["group"] & {
 function Card({ url, ...props }: CardProps) {
 	const ref = useRef<THREE.Mesh>(null); // Adjusted to use a single type argument
 	const [hovered, setHovered] = useState(false);
+	const scroll = useScroll();
 
 	const pointerOver = (e: Event) => {
 		e.stopPropagation();
@@ -104,15 +144,20 @@ function Card({ url, ...props }: CardProps) {
 
 	useFrame((state, delta) => {
 		if (!ref.current) return;
-		easing.damp3(ref.current.scale, hovered ? 1.15 : 1, 0.1, delta);
-		easing.damp(
-			ref.current.material,
-			"radius",
-			hovered ? 0.25 : 0.1,
-			0.2,
-			delta
-		);
-		easing.damp(ref.current.material, "zoom", hovered ? 1 : 1.5, 0.2, delta);
+
+		const inView = scroll.range(0, 0.75); // Cards fully visible during pages 0-3
+		const fadeOut = scroll.range(0.5, 0.25); // Fade out between 3 and 4
+
+		// Fade and scale logic
+		const targetScale = hovered ? 1.15 : 1;
+		const fade = 1 - fadeOut; // Inverts so 1 -> 0
+
+		// Apply fading out
+		(ref.current.material as THREE.MeshBasicMaterial).opacity = fade;
+		(ref.current.material as THREE.MeshBasicMaterial).transparent = true;
+
+		// Optionally, scale down during fade
+		// easing.damp3(ref.current.scale, targetScale * fade, 0.1, delta);
 	});
 
 	return (
@@ -128,5 +173,34 @@ function Card({ url, ...props }: CardProps) {
 		>
 			{/* <bentPlaneGeometry args={[0.1, 1, 1, 20, 20]} /> */}
 		</Image>
+	);
+}
+
+function Section({ children }: { children: React.ReactNode }): JSX.Element {
+	return (
+		<div className="h-screen w-screen flex flex-col items-start justify-center mx-auto outline-white outline-2">
+			{children}
+		</div>
+	);
+}
+
+function PianoSection() {
+	const scroll = useScroll();
+	const groupRef = useRef<THREE.Group>(null);
+
+	useFrame((state, delta) => {
+		const appear = scroll.range(0.5, 0.21); // scroll.range(start, length)
+		const eased = easing.linear(appear); // smoother
+
+		if (groupRef.current) {
+			easing.damp3(groupRef.current.position, [0.5, -5 + 5 * eased, 0], 0.1, delta);
+			easing.damp3(groupRef.current.scale, [eased, eased, eased], 0.1, delta);
+		}
+	});
+
+	return (
+		<group position={[0.5,0,0]} ref={groupRef}>
+			<PianoModel />
+		</group>
 	);
 }
