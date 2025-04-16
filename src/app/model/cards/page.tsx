@@ -52,9 +52,7 @@ export default function Page() {
 							</h1>
 						</Section>
 						<Section>
-							<h1 style={{ fontSize: "4rem", color: "#fff" }}>
-								Contact us 🎉
-							</h1>
+							<h1 style={{ fontSize: "4rem", color: "#fff" }}>Contact us 🎉</h1>
 						</Section>
 					</div>
 				</Scroll>
@@ -193,13 +191,18 @@ function PianoSection() {
 		const eased = easing.linear(appear); // smoother
 
 		if (groupRef.current) {
-			easing.damp3(groupRef.current.position, [0.5, -5 + 5 * eased, 0], 0.1, delta);
+			easing.damp3(
+				groupRef.current.position,
+				[0.5, -5 + 5 * eased, 0],
+				0.1,
+				delta
+			);
 			easing.damp3(groupRef.current.scale, [eased, eased, eased], 0.1, delta);
 		}
 	});
 
 	return (
-		<group position={[0.5,0,0]} ref={groupRef}>
+		<group position={[0.5, 0, 0]} ref={groupRef}>
 			<PianoModel />
 		</group>
 	);
