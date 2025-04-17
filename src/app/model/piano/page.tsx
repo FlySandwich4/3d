@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { XR, createXRStore, useXR } from "@react-three/xr";
 import { PianoModel } from "@/components/piano";
 import { Environment, OrbitControls } from "@react-three/drei";
+import { CityModel } from "../city-view/city";
 
 const store = createXRStore();
 

@@ -38,7 +38,7 @@ function Mac(props: any) {
 	return (
 		<group ref={group} {...props} dispose={null}>
 			<group rotation-x={-0.425} position={[0, -0.04, 0.41]}>
-				<motion.group position={[0, 2.96, -0.13]} rotation={[Math.PI / 2, 0, 0]}>
+				<group position={[0, 2.96, -0.13]} rotation={[Math.PI / 2, 0, 0]}>
 					<mesh
 						material={materials.aluminium}
 						geometry={(nodes["Cube008"] as THREE.Mesh).geometry}
@@ -64,7 +64,7 @@ function Mac(props: any) {
 							</div>
 						</Html>
 					</mesh>
-				</motion.group>
+				</group>
 			</group>
 			<mesh
 				material={materials.keys}

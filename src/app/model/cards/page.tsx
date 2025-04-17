@@ -13,6 +13,7 @@ import {
 	Scroll,
 	ImageProps,
 	Html,
+	Text,
 } from "@react-three/drei";
 import { easing } from "maath";
 // import "/images/thinkingCat.jpg"
@@ -155,7 +156,7 @@ function Card({ url, ...props }: CardProps) {
 		(ref.current.material as THREE.MeshBasicMaterial).transparent = true;
 
 		// Optionally, scale down during fade
-		// easing.damp3(ref.current.scale, targetScale * fade, 0.1, delta);
+		easing.damp3(ref.current.scale, targetScale * fade, 0.1, delta);
 	});
 
 	return (
@@ -204,6 +205,15 @@ function PianoSection() {
 	return (
 		<group position={[0.5, 0, 0]} ref={groupRef}>
 			<PianoModel />
+			<Text
+				fontSize={1}
+				color="white"
+				position={[0, 0, -10]}
+				anchorY="middle"
+				anchorX="center"
+			>
+				233e1212e1212e1
+			</Text>
 		</group>
 	);
 }
