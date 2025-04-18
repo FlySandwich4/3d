@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { JSX, Suspense, useRef, useState } from "react";
+import { easing } from "maath";
 import { XR, createXRStore, useXR } from "@react-three/xr";
 import { PianoModel } from "@/components/piano";
 import {
@@ -10,28 +11,50 @@ import {
 	PerspectiveCamera,
 	Scroll,
 	ScrollControls,
+	useScroll,
 } from "@react-three/drei";
 import { CityModel } from "../city-view/city";
-import { Group, Vector2, Vector3 } from "three";
+import { Group, Vector2, Vector3, Scene } from "three";
 import { motion } from "framer-motion";
+import { getPageToInterval } from "@/scrollUtil";
 
 const store = createXRStore();
 
 function SceneContent({ onReady }: { onReady: () => void }) {
 	const isPresenting = useXR().mode == "immersive-ar";
 	const groupRef = useRef<Group>(null);
+	const envRef = useRef<number>(1);
+	const [intensity, setIntensity] = useState(1);
 	const isRendering = useRef(false);
 	// const mouse = useRef(new Vector2());
 
 	const { camera, gl, pointer } = useThree();
 	const vec = new Vector3();
-	useFrame(() => {
-		// camera.position.lerp(vec.set(pointer.x * 2, pointer.y * 1, 5), 0.05);
-		camera.rotation.y = -pointer.x * 2 * 0.05;
-		camera.rotation.x = pointer.y * 2 * 0.05;
+	const scroll = useScroll();
+	const rotateInterval = getPageToInterval(scroll.pages, 1, 1);
+
+	useFrame((state, delta) => {
+		const range = scroll.range(
+			rotateInterval.start,
+			rotateInterval.end - rotateInterval.start
+		);
+		easing.damp(camera.rotation, "y", -pointer.x * 0.1, 0.2, delta);
+		easing.damp(camera.rotation, "x", pointer.y * 0.1, 0.2, delta);
+		easing.damp(
+			groupRef.current!.rotation,
+			"x",
+			(-range * Math.PI * 1) / 6,
+			0.2,
+			delta
+		);
 		if (!isRendering.current) {
 			isRendering.current = true;
 			onReady();
+		}
+		if (range !== 0 && range !== 1) {
+			// Optional: tweak curve to match visual expectation
+			const i = 1 - range * 0.8; // reduce intensity as range goes from 0 → 1
+			// setIntensity(i);
 		}
 	});
 
@@ -39,7 +62,11 @@ function SceneContent({ onReady }: { onReady: () => void }) {
 		<group ref={groupRef} position={isPresenting ? [0, 1.6, -3] : [0, 0, 2]}>
 			<PerspectiveCamera makeDefault fov={90} position={[0, 0, 2]} />
 			<PianoModel />
-			<Environment files={"/images/river.hdr"} background />
+			<Environment
+				files={"/images/river.hdr"}
+				background
+				backgroundIntensity={intensity}
+			/>
 		</group>
 	);
 }

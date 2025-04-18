@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Center,
 	GizmoHelper,
 	GizmoViewport,
 	Html,
@@ -29,8 +30,9 @@ export default function Page() {
 				far: 1000000,
 			}}
 		>
+			{/* <OrbitControls /> */}
 			{/* <PianoModel /> */}
-			<ScrollControls pages={3} damping={0.5} distance={1}>
+			<ScrollControls pages={5} damping={0.5} distance={1} maxSpeed={0.25}>
 				<City />
 				{/* <Html
 					position={[-14124.39, -3356.9, -23296.83]}
@@ -41,23 +43,9 @@ export default function Page() {
 					<div className="text-6xl text-white font-bold"> weafawfwa </div>
 				</Html> */}
 
-				<Text3D
-					curveSegments={32}
-					position={[0,0,0]}
-					bevelEnabled
-					bevelSize={0.04}
-					bevelThickness={0.1}
-					height={0.5}
-					lineHeight={0.5}
-					letterSpacing={-0.06}
-					size={1.5}
-					font="/Inter_Bold.json"
-				>
-					{`hello\nworld`}
-					<meshNormalMaterial />
-				</Text3D>
 				<FloatingText3D />
 			</ScrollControls>
+
 			{/* <CameraLogger /> */}
 			<directionalLight position={[10, 10, 10]} intensity={2} castShadow />
 
@@ -84,11 +72,12 @@ function City() {
 
 	const targetPosition = useRef(new Vector3());
 
+	const from = new Vector3(-50705.31, 146.03, -86191.36);
+	const to = new Vector3(-84124.39, 4356.9, 673296.83);
+
 	useFrame((state, delta) => {
 		const t = scrollData.offset; // normalized scroll position (0 to 1)
 		// From and To positions
-		const from = new Vector3(-50705.31, 146.03, -86191.36);
-		const to = new Vector3(-54124.39, 4356.9, -23296.83);
 
 		// Interpolate between from → to based on scroll
 		targetPosition.current.lerpVectors(from, to, t);
@@ -117,17 +106,14 @@ function City() {
 	);
 }
 
-
 function FloatingText3D() {
 	const ref = useRef<THREE.Mesh>(null);
-
-
 
 	return (
 		<Text3D
 			ref={ref}
-			position={[-33000, 0,-50000]}
-			rotation={[0,Math.PI * 5/4,0]}
+			position={[-13000, 0, -10000]}
+			rotation={[0, (Math.PI * 5) / 4, 0]}
 			curveSegments={322}
 			bevelEnabled
 			bevelSize={0.04}
@@ -135,7 +121,7 @@ function FloatingText3D() {
 			height={12}
 			lineHeight={0.5}
 			letterSpacing={-0.06}
-			size={1000}
+			size={4000}
 			font="/Inter_Bold.json"
 		>
 			{`hello\nworld`}

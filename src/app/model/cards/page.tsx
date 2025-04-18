@@ -20,6 +20,7 @@ import { easing } from "maath";
 import "@/util";
 import { PianoModel } from "@/components/piano";
 import { motion } from "framer-motion";
+import { getPageToInterval } from "@/scrollUtil";
 
 export default function Page() {
 	return (
@@ -187,18 +188,40 @@ function PianoSection() {
 	const scroll = useScroll();
 	const groupRef = useRef<THREE.Group>(null);
 
+	const appearAnimationInterval = getPageToInterval(scroll.pages, 2, 1);
+	const disappearAnimationInterval = getPageToInterval(scroll.pages, 3.5, 0.5);
+
 	useFrame((state, delta) => {
-		const appear = scroll.range(0.5, 0.21); // scroll.range(start, length)
+		const appear = scroll.range(
+			appearAnimationInterval.start,
+			appearAnimationInterval.end - appearAnimationInterval.start
+		); // scroll.range(start, length)
 		const eased = easing.linear(appear); // smoother
 
+		const disappear = scroll.range(
+			disappearAnimationInterval.start,
+			disappearAnimationInterval.end - disappearAnimationInterval.start
+		);
+
+		const eased2 = easing.linear(disappear); // smoother
+
 		if (groupRef.current) {
+			if (eased2 <= 0) {
+				easing.damp3(
+					groupRef.current.position,
+					[0.5, -5 + 5 * eased, 0],
+					0.1,
+					delta
+				);
+				easing.damp3(groupRef.current.scale, [eased, eased, eased], 0.1, delta);
+			}
+
 			easing.damp3(
-				groupRef.current.position,
-				[0.5, -5 + 5 * eased, 0],
+				groupRef.current.scale,
+				[1 - eased2, 1 - eased2, 1 - eased2],
 				0.1,
 				delta
 			);
-			easing.damp3(groupRef.current.scale, [eased, eased, eased], 0.1, delta);
 		}
 	});
 
