@@ -6,30 +6,43 @@ import { easing } from "maath";
 import { XR, createXRStore, useXR } from "@react-three/xr";
 import { PianoModel } from "@/components/piano";
 import {
+	Center,
 	Environment,
+	Html,
 	OrbitControls,
 	PerspectiveCamera,
 	Scroll,
 	ScrollControls,
+	Text,
+	TextProps,
 	useScroll,
 } from "@react-three/drei";
 import { CityModel } from "../city-view/city";
-import { Group, Vector2, Vector3, Scene } from "three";
+import {
+	Group,
+	Vector2,
+	Vector3,
+	Scene,
+	MeshStandardMaterial,
+	Material,
+} from "three";
 import { motion } from "framer-motion";
 import { getPageToInterval } from "@/scrollUtil";
+import { Exo_2 } from "next/font/google";
 
 const store = createXRStore();
 
 function SceneContent({ onReady }: { onReady: () => void }) {
 	const isPresenting = useXR().mode == "immersive-ar";
 	const groupRef = useRef<Group>(null);
-	const envRef = useRef<number>(1);
 	const [intensity, setIntensity] = useState(1);
 	const isRendering = useRef(false);
+	const { scene } = useThree();
+	const textRef = useRef<TextProps>(null);
+
 	// const mouse = useRef(new Vector2());
 
 	const { camera, gl, pointer } = useThree();
-	const vec = new Vector3();
 	const scroll = useScroll();
 	const rotateInterval = getPageToInterval(scroll.pages, 1, 1);
 
@@ -51,22 +64,27 @@ function SceneContent({ onReady }: { onReady: () => void }) {
 			isRendering.current = true;
 			onReady();
 		}
-		if (range !== 0 && range !== 1) {
-			// Optional: tweak curve to match visual expectation
-			const i = 1 - range * 0.8; // reduce intensity as range goes from 0 → 1
-			// setIntensity(i);
+		// easing.damp3(textRef.current?.position, [0, 0, 0], 0.1, delta);
+		// Optional: tweak curve to match visual expectation
+		const i = 1 - range * 0.8; // reduce intensity as range goes from 0 → 1
+		if (scene.backgroundIntensity == i) {
+			return;
 		}
+		scene.backgroundIntensity = i;
+		console.log("Intensity:", i);
 	});
 
 	return (
 		<group ref={groupRef} position={isPresenting ? [0, 1.6, -3] : [0, 0, 2]}>
-			<PerspectiveCamera makeDefault fov={90} position={[0, 0, 2]} />
-			<PianoModel />
+			<PerspectiveCamera makeDefault fov={90} position={[-2, 0, 3]} />
+			<Text ref={textRef} rotation={[0, 0.6, 0]} scale={2}>
+				we are
+			</Text>
 			<Environment
 				files={"/images/river.hdr"}
 				background
 				backgroundIntensity={intensity}
-			/>
+			></Environment>
 		</group>
 	);
 }
@@ -81,6 +99,7 @@ export default function Page() {
 					<XR store={store}>
 						<ScrollControls pages={5} distance={0.2}>
 							<SceneContent onReady={() => setSceneReady(true)} />
+
 							<Scroll html>
 								<div className="flex flex-col items-center w-screen absolute">
 									<Section>
